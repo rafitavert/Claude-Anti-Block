@@ -12,6 +12,7 @@ $carpeta = "C:\sing-box"
 $gris = [System.Drawing.Color]::Gray
 $verde = [System.Drawing.Color]::Green
 $rojo = [System.Drawing.Color]::Red
+$LIMITE = 10
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "Estado del entorno"
@@ -72,7 +73,7 @@ $lblNota = New-Object System.Windows.Forms.Label
 $lblNota.SetBounds(15, 309, 390, 100)
 $lblNota.Font = New-Object System.Drawing.Font("Segoe UI", 8)
 $lblNota.ForeColor = [System.Drawing.Color]::DimGray
-$lblNota.Text = "Modo Claude: tunel arriba, Claude sale por tu proxy. Modo Normal: tunel apagado, Claude encerrado si el firewall sigue puesto. Desconecta el VPN antes de encender."
+$lblNota.Text = "Modo Claude: tunel arriba, Claude sale por tu proxy. Modo Normal: tunel apagado. Si la IP sale gris, la lectura esta vencida y el estado no se puede afirmar."
 $form.Controls.Add($lblNota)
 
 $script:esperada = ""
@@ -80,6 +81,7 @@ try { $script:esperada = (Get-Content "C:\sing-box\ajustes.json" -Raw | ConvertF
 
 $script:cargaHasta = [DateTime]::Now.AddSeconds(10)
 $script:ip = ""
+$script:ipFecha = [DateTime]::MinValue
 $script:tun = $false
 $script:fw = -1
 $script:vig = $null
@@ -90,6 +92,9 @@ $script:n3 = 99
 
 function Refrescar {
     $cargando = [DateTime]::Now -lt $script:cargaHasta
+    $edad = ([DateTime]::Now - $script:ipFecha).TotalSeconds
+    $fresco = ($script:ip -ne "" -and $script:ip -ne "sin respuesta" -and $edad -le $LIMITE)
+    $okIP = ($fresco -and $script:esperada -ne "" -and $script:ip -eq $script:esperada)
 
     if ($script:tun) { $lblTun.Text = "Tunel: ACTIVO"; $lblTun.ForeColor = $verde }
     else { $lblTun.Text = "Tunel: apagado"; $lblTun.ForeColor = $gris }
@@ -108,23 +113,26 @@ function Refrescar {
 
     if ($script:ip -eq "") {
         $lblIP.Text = "IP: consultando..."; $lblIP.ForeColor = $gris
+    } elseif (-not $fresco) {
+        $lblIP.Text = "IP: sin dato fresco"; $lblIP.ForeColor = $gris
     } elseif (-not $script:tun) {
         $lblIP.Text = "IP actual: $($script:ip)"; $lblIP.ForeColor = $gris
-    } elseif ($script:esperada -ne "" -and $script:ip -eq $script:esperada) {
+    } elseif ($okIP) {
         $lblIP.Text = "IP: $($script:ip) / $($script:esperada)"; $lblIP.ForeColor = $verde
     } else {
         $lblIP.Text = "IP: $($script:ip) / $($script:esperada)"; $lblIP.ForeColor = $rojo
     }
 
-    $okIP = ($script:esperada -ne "" -and $script:ip -eq $script:esperada)
-
     if ($cargando) {
         $lblModo.Text = "COMPROBANDO"
+        $lblModo.BackColor = [System.Drawing.Color]::FromArgb(90,90,90); $lblModo.ForeColor = [System.Drawing.Color]::White
+    } elseif ($script:tun -and -not $fresco) {
+        $lblModo.Text = "SIN DATO FRESCO"
         $lblModo.BackColor = [System.Drawing.Color]::FromArgb(90,90,90); $lblModo.ForeColor = [System.Drawing.Color]::White
     } elseif ($script:tun -and $script:fw -gt 0 -and $script:vig -and $okIP -and -not $script:vpn) {
         $lblModo.Text = "MODO CLAUDE - PROTEGIDO"
         $lblModo.BackColor = [System.Drawing.Color]::FromArgb(30,123,52); $lblModo.ForeColor = [System.Drawing.Color]::White
-    } elseif ($script:tun -and $script:ip -ne "" -and -not $okIP) {
+    } elseif ($script:tun -and -not $okIP) {
         $lblModo.Text = "MODO CLAUDE - IP INCORRECTA (FUGA)"
         $lblModo.BackColor = [System.Drawing.Color]::FromArgb(178,34,34); $lblModo.ForeColor = [System.Drawing.Color]::White
     } elseif (-not $script:tun -and $script:fw -gt 0) {
@@ -141,7 +149,8 @@ function Refrescar {
 
 function ForzarCarga {
     $script:cargaHasta = [DateTime]::Now.AddSeconds(10)
-    $script:fw = -1; $script:vig = $null; $script:vpn = $null; $script:ip = ""
+    $script:fw = -1; $script:vig = $null; $script:vpn = $null
+    $script:ip = ""; $script:ipFecha = [DateTime]::MinValue
     $script:n1 = 99; $script:n2 = 99; $script:n3 = 99
     Refrescar
 }
@@ -158,7 +167,7 @@ $t1.Add_Tick({
         try { $script:vig = [bool](Get-CimInstance Win32_Process -Filter "CommandLine LIKE '%killswitch.ps1%'" -ErrorAction SilentlyContinue) } catch { $script:vig = $false }
         try {
             $script:vpn = [bool](Get-NetAdapter -ErrorAction SilentlyContinue |
-                Where-Object { $_.Status -eq "Up" -and $_.InterfaceDescription -match "VPN|WireGuard|TAP|OpenVPN|Tailscale|Proton|Nord|Express" })
+                Where-Object { $_.Status -eq "Up" -and $_.Name -ne "tun-claude" -and $_.InterfaceDescription -match "VPN|WireGuard|Wintun|TAP|OpenVPN|Tailscale|Proton|Nord|Express|SonicWall|AnyConnect|Fortinet|ZeroTier|Mullvad|Surfshark|Windscribe|CyberGhost|L2TP|IKEv2|GlobalProtect" })
         } catch { $script:vpn = $false }
         Refrescar
     }
@@ -171,9 +180,13 @@ $t1.Add_Tick({
     }
 
     $script:n3++
-    if ($script:n3 -ge 10) {
+    if ($script:n3 -ge 4 -or [DateTime]::Now -lt $script:cargaHasta) {
         $script:n3 = 0
-        try { $script:ip = (Invoke-RestMethod -Uri "http://ip-api.com/json/?fields=status,query" -TimeoutSec 4).query } catch { $script:ip = "sin respuesta" }
+        try {
+            $o = & curl.exe -s --max-time 5 "http://ip-api.com/json/?fields=status,query"
+            if ($o -match '"query":"([^"]+)"') { $script:ip = $Matches[1]; $script:ipFecha = [DateTime]::Now }
+            else { $script:ip = "sin respuesta" }
+        } catch { $script:ip = "sin respuesta" }
         Refrescar
     }
 })

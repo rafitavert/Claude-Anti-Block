@@ -36,6 +36,9 @@ function Get-Ajustes {
 }
 
 function Get-IPPublica {
-    try { return (Invoke-RestMethod -Uri "http://ip-api.com/json/?fields=status,query" -TimeoutSec 5).query }
-    catch { return $null }
+    try {
+        $o = & curl.exe -s --max-time 5 "http://ip-api.com/json/?fields=status,query"
+        if ($o -match '"query":"([^"]+)"') { return $Matches[1] }
+        return $null
+    } catch { return $null }
 }
