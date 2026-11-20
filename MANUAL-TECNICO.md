@@ -98,3 +98,20 @@ Botón 1, trabajar, botón 2. Tras un corte: 2 y luego 1.
 - Renueva antes del vencimiento. Si cambian IP o puerto, vuelve a correr instalar.ps1
 - Tras cada actualización de Claude, arranca una vez con el botón para regenerar el firewall.
 - Diagnóstico con .\estado.ps1
+## Panel de estado
+
+El acceso "0. Panel de Estado" muestra el modo actual. Cinco estados:
+
+- MODO CLAUDE - PROTEGIDO (verde): tunel arriba, firewall bloqueando, vigilante corriendo, IP correcta, sin VPN.
+- MODO CLAUDE - IP INCORRECTA (FUGA) (rojo): el tunel esta arriba pero la salida no es tu proxy.
+- MODO NORMAL - PROTEGIDO (verde azulado): tunel apagado y firewall puesto. Claude queda encerrado.
+- MODO NORMAL - DESPROTEGIDO (rojo oscuro): tunel apagado y firewall apagado.
+- PARCIAL - REVISAR (ambar): combinacion inconsistente.
+
+Botones: Encender, Apagar, Firewall ON, Firewall OFF.
+
+El firewall OFF es para usar un VPN en vez del tunel. Al encender con el boton verde, el firewall se reactiva solo porque iniciar_claude.ps1 recrea las reglas en cada arranque.
+
+Nunca enciendas el tunel con el VPN conectado: el VPN pone sus propias rutas y el tunel no las desplaza. El panel lo marca como conflicto y la IP saldra equivocada.
+
+El panel es comodidad, no seguridad. Si se cierra, la proteccion sigue. El que corta es killswitch.ps1

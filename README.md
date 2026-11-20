@@ -47,7 +47,7 @@ Instalar no basta: hay que verificar fugas y probar el kill switch. Sigue la gu�
 - Usa una sola IP. Cambiarla a media sesión es tan mala señal como una IP sucia.
 - Entra a Claude con correo y contraseña, no con Google.
 - Nunca abras Claude antes del túnel ni lo dejes abierto al cambiar de red.
-- Los proveedores de ISP proxy alojan las IPs en datacenter bajo un ASN de operador. Es la categoría del producto, no un defecto de este repo.
+- Los proveedores de ISP proxy alojan las IPs en datacenter bajo un ASN de operador. Es la categoría del producto, no un defecto de este repo. Si necesitas una residencial pura, este enfoque no te la da.
 
 ## Licencia
 

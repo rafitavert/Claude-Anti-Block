@@ -46,3 +46,14 @@ El TUN no levanta hasta pasar el portal. Conéctate, pasa el portal con Claude c
 ## La app de Claude se actualizó y el firewall dejó de bloquear
 
 La ruta del ejecutable cambió. Arranca una vez con el botón 1: firewall.ps1 resuelve la ruta nueva solo.
+## Aparece ACTIVO pero la IP es la real
+
+Adaptador tun-claude huerfano de una corrida anterior. Comprueba Get-Process sing-box: si no hay proceso, el adaptador sobra. Apaga, deten el proceso y arranca de nuevo.
+
+## La IP sale de otro pais con el tunel arriba
+
+Hay un VPN conectado. Desconectalo, apaga y vuelve a encender.
+
+## El panel no detecta el VPN
+
+Deteccion por nombre de adaptador, proceso y proxy de sistema. Si tu cliente no usa ninguno de esos nombres, el panel puede no verlo. La verdad la da la linea de IP, no la de VPN.
