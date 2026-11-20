@@ -4,11 +4,11 @@ if (-not (Test-Admin)) { Write-Host "Ejecuta como administrador." -ForegroundCol
 $sh = New-Object -ComObject WScript.Shell
 $d  = [Environment]::GetFolderPath("Desktop")
 
-function New-Acceso($nombre, $script, $icono) {
+function New-Acceso($nombre, $script, $icono, $oculto) {
     $lnk = Join-Path $d "$nombre.lnk"
     $s = $sh.CreateShortcut($lnk)
     $s.TargetPath = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-    $s.Arguments = "-ExecutionPolicy Bypass -File `"C:\sing-box\$script`""
+    $s.Arguments = $(if ($oculto) { "-WindowStyle Hidden " } else { "" }) + "-ExecutionPolicy Bypass -File `"C:\sing-box\$script`""
     $s.WorkingDirectory = "C:\sing-box"
     $s.IconLocation = "C:\Windows\System32\shell32.dll,$icono"
     $s.Save()
@@ -16,8 +16,9 @@ function New-Acceso($nombre, $script, $icono) {
     Write-Host "Creado: $nombre" -ForegroundColor Green
 }
 
-New-Acceso "1. Iniciar Entorno Claude" "iniciar_claude.ps1" 137
-New-Acceso "2. Apagar Tunel" "apagar_claude.ps1" 131
+New-Acceso "0. Panel de Estado" "panel.ps1" 21 $true
+New-Acceso "1. Iniciar Entorno Claude" "iniciar_claude.ps1" 137 $false
+New-Acceso "2. Apagar Tunel" "apagar_claude.ps1" 131 $false
 
 Write-Host ""
-Write-Host "Verifica que ambos tengan 'Ejecutar como administrador' marcado." -ForegroundColor Yellow
+Write-Host "Verifica que los tres tengan 'Ejecutar como administrador' marcado." -ForegroundColor Yellow

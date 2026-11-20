@@ -81,7 +81,7 @@ if ($LASTEXITCODE -ne 0) { Write-Host "config.json invalido." -ForegroundColor R
     ConvertTo-Json | Set-Content "$Destino\ajustes.json" -Encoding ASCII
 
 Copy-Item "$PSScriptRoot\killswitch.ps1", "$PSScriptRoot\firewall.ps1", "$PSScriptRoot\iniciar_claude.ps1",
-    "$PSScriptRoot\apagar_claude.ps1", "$PSScriptRoot\estado.ps1", "$PSScriptRoot\comun.ps1" $Destino -Force
+    "$PSScriptRoot\apagar_claude.ps1", "$PSScriptRoot\estado.ps1", "$PSScriptRoot\comun.ps1", "$PSScriptRoot\panel.ps1" $Destino -Force
 
 @"
 IP: $esperada

@@ -1,5 +1,5 @@
 {
-  "log": { "level": "info", "timestamp": true },
+  "log": { "level": "warn", "timestamp": true },
   "dns": {
     "servers": [ __DNS__ ],
     "final": "dns-remoto"
