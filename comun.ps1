@@ -37,8 +37,12 @@ function Get-Ajustes {
 
 function Get-IPPublica {
     try {
-        $o = & curl.exe -s --max-time 5 "http://ip-api.com/json/?fields=status,query"
+        $o = (& curl.exe -s --max-time 4 "https://api.ipify.org").Trim()
+        if ($o -match '^\d{1,3}(\.\d{1,3}){3}$') { return $o }
+    } catch { }
+    try {
+        $o = (& curl.exe -s --max-time 4 "http://ip-api.com/json/?fields=status,query").Trim()
         if ($o -match '"query":"([^"]+)"') { return $Matches[1] }
-        return $null
-    } catch { return $null }
+    } catch { }
+    return $null
 }

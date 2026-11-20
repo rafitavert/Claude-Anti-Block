@@ -3,6 +3,7 @@ $carpeta = "C:\sing-box"
 $esperada = (Get-Ajustes).esperada
 $log = "$carpeta\killswitch.log"
 $contador = 0
+$fallos = 0
 
 function Cortar($motivo) {
     "$(Get-Date -f 'HH:mm:ss') CORTE: $motivo" | Out-File $log -Append -Encoding utf8
@@ -22,9 +23,15 @@ while ($true) {
     $contador++
     if ($contador -ge 10) {
         $contador = 0
+$fallos = 0
         $ip = Get-IPPublica
-        if (-not $ip) { Cortar "sin respuesta del verificador de IP"; break }
-        if ($ip -ne $esperada) { Cortar "IP de salida distinta ($ip)"; break }
+        if (-not $ip) {
+            $fallos++
+            if ($fallos -ge 2) { Cortar "sin respuesta del verificador de IP (2 seguidos)"; break }
+        } else {
+            $fallos = 0
+            if ($ip -ne $esperada) { Cortar "IP de salida distinta ($ip)"; break }
+        }
     }
     Start-Sleep -Milliseconds 1000
 }
