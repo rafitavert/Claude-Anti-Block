@@ -1,0 +1,43 @@
+{
+  "log": { "level": "info", "timestamp": true },
+  "dns": {
+    "servers": [ __DNS__ ],
+    "final": "dns-remoto"
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "interface_name": "tun-claude",
+      "address": ["172.19.0.1/30"],
+      __SNIFF_IN__
+      "mtu": 1400,
+      "auto_route": true,
+      "strict_route": true,
+      __STACK__
+      "route_exclude_address": ["192.168.0.0/16", "10.0.0.0/8"]
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "__TIPO__",
+      "tag": "proxy-isp",
+      "server": "__SERVIDOR__",
+      "server_port": __PUERTO__,
+      "username": "__USUARIO__",
+      "password": "__CLAVE__"
+    },
+    { "type": "direct", "tag": "direct" }
+  ],
+  "route": {
+    "rules": [
+      __SNIFF_RULE__
+      { "protocol": "dns", "action": "hijack-dns" },
+      { "ip_is_private": true, "action": "route", "outbound": "direct" },
+      { "ip_version": 6, "action": "reject" },
+      { "network": "udp", "port": 443, "action": "reject" }
+    ],
+    "final": "proxy-isp",
+    "auto_detect_interface": true
+  }
+}
