@@ -1,0 +1,7 @@
+datos.txt
+config.json
+ajustes.json
+*.log
+wintun.dll
+sing-box.exe
+libcronet.dll
