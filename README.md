@@ -36,7 +36,7 @@ No es una VPN. Es un candado: si el túnel no está sano, Claude no sale a ning�
 
 ## Instalación en una línea
 
-Desde la carpeta scripts, como administrador:
+Desde la carpeta del repo, como administrador:
 
     .\instalar.ps1 -Servidor 1.2.3.4 -Puerto 12324 -Usuario usuario -Clave clave -Protocolo socks
 

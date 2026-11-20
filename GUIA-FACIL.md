@@ -55,7 +55,7 @@ Debes tener dos archivos ahí. Nada más por ahora.
 ## Paso 3. Instalar
 
 1. Inicio, escribe PowerShell, clic derecho, Ejecutar como administrador.
-2. Escribe cd y un espacio, arrastra la carpeta scripts del repo a la ventana. Enter.
+2. Escribe cd y un espacio, arrastra la carpeta del repo a la ventana. Enter.
 3. Copia la línea de abajo, cambia los cuatro datos y pégala:
 
     .\instalar.ps1 -Servidor TU_IP -Puerto TU_PUERTO -Usuario TU_USUARIO -Clave TU_CLAVE -Protocolo socks

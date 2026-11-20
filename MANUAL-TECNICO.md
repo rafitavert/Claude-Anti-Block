@@ -30,7 +30,7 @@ Debe estar entre 1.12 y 1.16. Si es menor, el instalador rechaza.
 
 ## Paso 3 — Instalar
 
-PowerShell como administrador, desde scripts:
+PowerShell como administrador, desde la carpeta del repo:
 
     .\instalar.ps1 -Servidor 1.2.3.4 -Puerto 12324 -Usuario usuario -Clave clave -Protocolo socks
 
